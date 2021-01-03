@@ -4,6 +4,13 @@ Backup specific folders to and upload to a cloud provider
 ## Install
 `python -m pip install Backup2Cloud`
 
+Enable the Drive API via:
+https://developers.google.com/drive/api/v3/quickstart/python
+In resulting dialog click DOWNLOAD CLIENT CONFIGURATION and save the file credentials.json to your working directory. 
+
+Or you can manage your already exisiting Google APIs here: https://console.developers.google.com/apis/
+
+
 ## Usage
 Set up INI file
 

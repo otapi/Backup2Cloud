@@ -18,8 +18,10 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     install_requires=[
-        'beautifulsoup4',
-        'requests'
+        'google-api-python-client',
+        'google-auth-httplib2',
+        'google-auth-oauthlib'
+       
     ],
     python_requires='>=3',
 ) 

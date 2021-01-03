@@ -10,6 +10,8 @@ In resulting dialog click DOWNLOAD CLIENT CONFIGURATION and save the file creden
 
 Or you can manage your already exisiting Google APIs here: https://console.developers.google.com/apis/
 
+At first run, let's follow the url (or open on a separated device) to authorize the API: 'Please visit this URL to authorize this application'
+
 
 ## Usage
 Set up INI file

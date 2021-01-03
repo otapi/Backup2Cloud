@@ -8,10 +8,10 @@ from google.auth.transport.requests import Request
 from googleapiclient.http import MediaFileUpload
 
 
-def zipencrypt(folder, zip):
+def zipencrypt(folder):
     pass
 
-def unzipdecrypt(zip, folder):
+def unzipdecrypt(folder):
     pass
 
 def gdrive(credentialfile):
@@ -28,16 +28,17 @@ def gdrive(credentialfile):
             creds.refresh(Request())
         else:
             flow = InstalledAppFlow.from_client_secrets_file(
-                credentialfile, ['https://www.googleapis.com/auth/drive.metadata.readonly'])
+                credentialfile, ['https://www.googleapis.com/auth/drive.metadata.readonly', 'https://www.googleapis.com/auth/drive.file'])
             creds = flow.run_local_server(port=0)
         # Save the credentials for the next run
         with open('token.pickle', 'wb') as token:
             pickle.dump(creds, token)
 
-    service = build('drive', 'v3', credentials=creds)
+    service = build('drive', 'v3', credentials=creds, cache_discovery=False)
+    
     return service
 
-def downloadfile(credentialfile, file):
+def listfiles(credentialfile):
     service = gdrive(credentialfile)
     results = service.files().list(
         pageSize=10, fields="nextPageToken, files(id, name)").execute()
@@ -49,44 +50,57 @@ def downloadfile(credentialfile, file):
         print('Files:')
         for item in items:
             print(u'{0} ({1})'.format(item['name'], item['id']))
-    service.close()
+
+def downloadfile(credentialfile, file):
     pass
 
 def uploadfile(credentialfile, file):
+    if not os.path.isfile(file):
+        raise Exception(f"The file to upload does not exists: {file}")
     service = gdrive(credentialfile)
     media = MediaFileUpload(file, mimetype='application/zip', resumable=True)
-    request = service.files().insert(media_body=media, body={'name': os.path.basename(file)})
+
+    
+    request = service.files().create(media_body=media, body={'name': os.path.basename(file)})
     response = None
     while response is None:
         status, response = request.next_chunk()
         if status:
             print("Uploaded %d%%." % int(status.progress() * 100))
-        print("Upload Complete!")
+        logging.info(f"Upload Complete!")
     service.close()
 
 def Main():
-    print("Backup2Cloud")
+    logging.info(f"Backup2Cloud")
 
-    print("Load INI")
-    configfile = os.path.dirname(os.path.abspath(__file__))+"/Backup2Cloud.ini"
+    logging.info(f"Load INI")
+    configfile = "Backup2Cloud.ini"
     logging.info(f"Using config {configfile}")
     config = configparser.ConfigParser()
     config.read(configfile)
     with tempfile.TemporaryDirectory() as tempdir:
         for cloudplace in config.sections():
-            print(f"Process f{cloudplace}")
+            logging.info(f"Process {cloudplace}")
             credentialfile = None
-            folder = None
+            zipfile = None
 
             for (key, val) in config.items(cloudplace):
                 if key=="credentials":
                     credentialfile = val
-                else:
+                    continue
+                elif key=="folder":
                     folder = val
-                    zipfile = os.path.join(tempdir, folder, ".zip")
-                    # process
+                    zipfile = os.path.join(tempdir, folder)
+                    zipencrypt(folder=zipfile)
+                elif key=="file":
+                    zipfile = val
 
-            
+                if not credentialfile:
+                    raise Exception(f"Credentials as missing from INI for {cloudplace}")
+                
+                if not zipfile:
+                    raise Exception(f"Either the folder or file is missing from INI for {cloudplace}")
+                uploadfile(credentialfile=credentialfile, file=zipfile)
 
 ### set up logging
 import logging, sys, socket

@@ -46,7 +46,7 @@ var/
 MANIFEST
 Scripts/
 pyvenv.cfg
-credentials.json
+credentials/
 token.pickle
 
 # PyInstaller

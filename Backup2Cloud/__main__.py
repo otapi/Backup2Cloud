@@ -10,9 +10,9 @@ def unzipdecrypt(folder):
     pass
 
 def Main():
-    logging.info(f"Backup2Cloud")
+    logging.info(f"Backup2Cloud - Backup specific folders to and upload to a cloud provider")
 
-    logging.info(f"Load INI")
+    logging.info(f"Load INI...")
     configfile = "Backup2Cloud.ini"
     logging.info(f"Using config {configfile}")
     config = configparser.ConfigParser()

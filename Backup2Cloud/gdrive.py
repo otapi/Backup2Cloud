@@ -14,7 +14,7 @@ class GDrive():
             self.connect(credentialfile)
 
     def connect(self, credentialfile):
-        if not self.service:
+        if self.service:
             logging.info(f"Already connected to GDrive. Avoid connecting multiple times by the same GDrive object.")
 
         logging.info(f"Connect to GDrive using {credentialfile}...")

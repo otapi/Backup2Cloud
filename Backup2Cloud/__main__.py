@@ -19,8 +19,8 @@ def cliHelp():
     print("                      e.g.: Backup2Cloud.py -d folder1")
     print("")
 
-CMD_UPLOAD = "1"
-CMD_DOWNLOAD = "2"
+CMD_UPLOAD = "CMD_UPLOAD"
+CMD_DOWNLOAD = "CMD_DOWNLOAD"
 
 def Main():
     logging.info(f"Backup2Cloud - Backup specific folders to and upload to a cloud provider")
@@ -52,6 +52,7 @@ def Main():
             with tempfile.TemporaryDirectory() as tempdir:
                 logging.info(f"Processing {cloudplace}")
                 zipfile = None
+                id = None
 
                 for (key, val) in config.items(cloudplace):
                     if key=="credentials":
@@ -59,11 +60,13 @@ def Main():
                         continue
                     elif key.startswith("folder"):
                         folder = val
+                        id = key
                         zipfile = os.path.join(tempdir, folder)
                         if command == CMD_UPLOAD:
                             zipencrypt(folder=zipfile)
                     elif key.startswith("file"):
                         zipfile = val
+                        id = key
 
                     if not gd.isconnected():
                         raise Exception(f"Credentials are missing from INI for {cloudplace}")
@@ -71,15 +74,24 @@ def Main():
                     if not zipfile:
                         raise Exception(f"Either the folder or file is missing from INI for {cloudplace}")
                     
+                    logging.debug(f"command: {command}")
+
                     if command == CMD_UPLOAD:
                         gd.uploadfile(filepath=zipfile)
+
+                    if command == CMD_DOWNLOAD:
+                        logging.debug(f"download_id: {download_id}")
+                        logging.debug(f"id: {id}")
+                        if download_id == id:
+                            gd.downloadfile(os.path.basename(zipfile), tempdir)
+                            input(f"Check zip here: {tempdir}")
 
 ### set up logging
 import logging, sys, socket
 
 machinename = socket.gethostname()
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.DEBUG,
     #format=f"%(message)s\t%(asctime)s\t{machinename}\t%(threadName)s\t%(levelname)s",
     format=f"%(message)s",
     handlers=[

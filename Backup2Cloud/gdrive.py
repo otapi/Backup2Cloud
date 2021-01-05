@@ -1,9 +1,9 @@
-import os
+import os, io
 import pickle
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
-from googleapiclient.http import MediaFileUpload
+from googleapiclient.http import MediaFileUpload, MediaIoBaseDownload
 import logging
 
 # Class to upload, download and list files on Google Drive.
@@ -96,6 +96,28 @@ class GDrive():
     def downloadfile(self, filename, localfolder):
         if not self.service:
             raise Exception("Call Connect before start using GDrive")
+
+        if not os.path.isdir(localfolder):
+            raise Exception(f"The folder does not exists: {localfolder}")
+        
+        fileId = self.fileexists(filename)
+        if not fileId:
+            raise Exception(f"The file was not found on the GDrive: {filename}")
+        
+        destination = os.path.join(localfolder, filename)
+        if os.path.exists(destination):
+            raise Exception(f"Local file is already exists: {destination}")
+        
+        logging.info(f"Download started for {filename}...")
+        request = self.service.files().get_media(fileId=fileId)
+
+        with open(destination, "wb") as fh:
+            downloader = MediaIoBaseDownload(fh, request)
+            done = False
+            while done is False:
+                status, done = downloader.next_chunk()
+                print("Downloaded %d%%." % int(status.progress() * 100))
+        logging.info(f"Download Complete!")
 
     # Return True if already connected
     def isconnected(self):

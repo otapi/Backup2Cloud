@@ -2,6 +2,7 @@ import configparser
 import os
 import tempfile
 from .gdrive import GDrive
+import logging
 
 def zipencrypt(folder):
     pass
@@ -9,8 +10,37 @@ def zipencrypt(folder):
 def unzipdecrypt(folder):
     pass
 
+def cliHelp():
+    print("Usage:")
+    print("   Backup2Cloud.py [-d ID [Folder]]")
+    print("             default: upload the packaged folders to cloud")
+    print("      -d ID [Folder]: download and extract specified ID entry of the INI to Folder")
+    print("                      (or to current folder if missing)")
+    print("                      e.g.: Backup2Cloud.py -d folder1")
+    print("")
+
+CMD_UPLOAD = "1"
+CMD_DOWNLOAD = "2"
+
 def Main():
     logging.info(f"Backup2Cloud - Backup specific folders to and upload to a cloud provider")
+
+    command = None
+    if len(sys.argv)==1:
+        command = CMD_UPLOAD
+    
+    download_id = None
+    if len(sys.argv)>2:
+        if sys.argv[1] == "-d":
+            download_id = sys.argv[2]
+            folder = None
+            if len(sys.argv)>3:
+                folder = sys.argv[3]
+            command = CMD_DOWNLOAD
+            
+    if not command:
+        cliHelp()
+        return
 
     logging.info(f"Load INI...")
     configfile = "Backup2Cloud.ini"
@@ -27,11 +57,12 @@ def Main():
                     if key=="credentials":
                         gd.connect(val)
                         continue
-                    elif key=="folder":
+                    elif key.startswith("folder"):
                         folder = val
                         zipfile = os.path.join(tempdir, folder)
-                        zipencrypt(folder=zipfile)
-                    elif key=="file":
+                        if command == CMD_UPLOAD:
+                            zipencrypt(folder=zipfile)
+                    elif key.startswith("file"):
                         zipfile = val
 
                     if not gd.isconnected():
@@ -39,7 +70,9 @@ def Main():
                     
                     if not zipfile:
                         raise Exception(f"Either the folder or file is missing from INI for {cloudplace}")
-                    gd.uploadfile(filepath=zipfile)
+                    
+                    if command == CMD_UPLOAD:
+                        gd.uploadfile(filepath=zipfile)
 
 ### set up logging
 import logging, sys, socket

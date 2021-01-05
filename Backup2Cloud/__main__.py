@@ -3,18 +3,15 @@ import os
 import tempfile
 from .gdrive import GDrive
 import logging
-
-def zipencrypt(folder):
-    pass
-
-def unzipdecrypt(folder):
-    pass
+import py7zr
 
 def cliHelp():
     print("Usage:")
-    print("   Backup2Cloud.py [-d ID [Folder]]")
+    print("   Backup2Cloud.py [-d *|ID [destination]]")
     print("             default: upload the packaged folders to cloud")
-    print("      -d ID [Folder]: download and extract specified ID entry of the INI to Folder")
+    print("       -d * [destination]: download and extract all entries of the INI to Folder")
+    print("                      (or to current folder if missing)")
+    print("      -d ID [destination]: download and extract specified ID entry of the INI to Folder")
     print("                      (or to current folder if missing)")
     print("                      e.g.: Backup2Cloud.py -d folder1")
     print("")
@@ -30,13 +27,15 @@ def Main():
         command = CMD_UPLOAD
     
     download_id = None
+    destination = os.getcwd()
     if len(sys.argv)>2:
         if sys.argv[1] == "-d":
-            download_id = sys.argv[2]
-            folder = None
-            if len(sys.argv)>3:
-                folder = sys.argv[3]
             command = CMD_DOWNLOAD
+            download_id = sys.argv[2]
+            if len(sys.argv)>3:
+                destination = sys.argv[3]
+            if not os.path.isdir(destination):
+                os.makedirs(destination)
             
     if not command:
         cliHelp()
@@ -53,28 +52,38 @@ def Main():
                 logging.info(f"Processing {cloudplace}")
                 zipfile = None
                 id = None
+                packagePassword = None
 
                 for (key, val) in config.items(cloudplace):
                     if key=="credentials":
                         gd.connect(val)
                         continue
+                    elif key=="packagepassword":
+                        packagePassword = val
+                        continue
                     elif key.startswith("folder"):
                         folder = val
                         id = key
-                        zipfile = os.path.join(tempdir, folder)
+                        zipfile = os.path.join(tempdir, os.path.basename(folder))+".7z"
                         if command == CMD_UPLOAD:
-                            zipencrypt(folder=zipfile)
+                            logging.info(f"Compressing to {zipfile}...")
+                            with py7zr.SevenZipFile(zipfile, 'w', password=packagePassword) as archive:
+                                archive.set_encrypted_header(True)
+                                archive.writeall(folder, os.path.basename(folder))
+                            logging.info(f"Compress done!")
                     elif key.startswith("file"):
                         zipfile = val
                         id = key
+
+                    logging.debug(f"command: {command}")
+                    logging.debug(f"key: {key}")
+                    logging.debug(f"val: {val}")
 
                     if not gd.isconnected():
                         raise Exception(f"Credentials are missing from INI for {cloudplace}")
                     
                     if not zipfile:
                         raise Exception(f"Either the folder or file is missing from INI for {cloudplace}")
-                    
-                    logging.debug(f"command: {command}")
 
                     if command == CMD_UPLOAD:
                         gd.uploadfile(filepath=zipfile)
@@ -82,9 +91,16 @@ def Main():
                     if command == CMD_DOWNLOAD:
                         logging.debug(f"download_id: {download_id}")
                         logging.debug(f"id: {id}")
-                        if download_id == id:
-                            gd.downloadfile(os.path.basename(zipfile), tempdir)
-                            input(f"Check zip here: {tempdir}")
+                        if download_id == "*" or download_id == id:
+                            localzip = gd.downloadfile(os.path.basename(zipfile), tempdir)
+                            destinationCurr = os.path.join(destination, id)
+                            if id == "folder" or id == "file":
+                                destinationCurr = destination
+
+                            logging.info(f"Extracting to {destinationCurr}...")
+                            with py7zr.SevenZipFile(localzip, mode='r', password=packagePassword) as archive:
+                                archive.extractall(destinationCurr)
+                            logging.info(f"Extract done!")
 
 ### set up logging
 import logging, sys, socket

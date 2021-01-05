@@ -1,4 +1,4 @@
-import os, io
+import os
 import pickle
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -83,7 +83,7 @@ class GDrive():
             raise Exception(f"The local file to upload does not exists: {filepath}")
 
         logging.info(f"Upload started for {filepath}...")
-        media = MediaFileUpload(filepath, mimetype='application/zip', resumable=True)
+        media = MediaFileUpload(filepath, mimetype='application/x-7z-compressed', resumable=True)
         request = self.service.files().create(media_body=media, body={'name': os.path.basename(filepath)})
         response = None
         while response is None:
@@ -118,6 +118,7 @@ class GDrive():
                 status, done = downloader.next_chunk()
                 print("Downloaded %d%%." % int(status.progress() * 100))
         logging.info(f"Download Complete!")
+        return destination
 
     # Return True if already connected
     def isconnected(self):

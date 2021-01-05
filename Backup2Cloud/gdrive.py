@@ -8,7 +8,8 @@ import logging
 
 # Class to upload, download and list files on Google Drive.
 class GDrive():
-    def __init__(self, credentialfile=None):
+    def __init__(self, name, credentialfile=None):
+        self.name = name
         self.service = None
         if credentialfile:
             self.connect(credentialfile)
@@ -22,8 +23,9 @@ class GDrive():
         # The file token.pickle stores the user's access and refresh tokens, and is
         # created automatically when the authorization flow completes for the first
         # time.
-        if os.path.exists('token.pickle'):
-            with open('token.pickle', 'rb') as token:
+        picklefile=f"{self.name}_token.pickle"
+        if os.path.exists(picklefile):
+            with open(picklefile, 'rb') as token:
                 creds = pickle.load(token)
         # If there are no (valid) credentials available, let the user log in.
         if not creds or not creds.valid:
@@ -34,7 +36,7 @@ class GDrive():
                     credentialfile, ['https://www.googleapis.com/auth/drive.metadata.readonly', 'https://www.googleapis.com/auth/drive.file'])
                 creds = flow.run_local_server(port=0)
             # Save the credentials for the next run
-            with open('token.pickle', 'wb') as token:
+            with open(picklefile, 'wb') as token:
                 pickle.dump(creds, token)
 
         self.service = build('drive', 'v3', credentials=creds, cache_discovery=False)

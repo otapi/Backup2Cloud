@@ -18,9 +18,9 @@ def Main():
     config = configparser.ConfigParser()
     config.read(configfile)
     for cloudplace in config.sections():
-        with GDrive() as gd:
+        with GDrive(cloudplace) as gd:
             with tempfile.TemporaryDirectory() as tempdir:
-                logging.info(f"Process {cloudplace}")
+                logging.info(f"Processing {cloudplace}")
                 zipfile = None
 
                 for (key, val) in config.items(cloudplace):

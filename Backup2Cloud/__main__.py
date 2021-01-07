@@ -5,6 +5,8 @@ from .gdrive import GDrive
 import logging
 import py7zr
 import hashlib
+from pathlib import Path
+import shutil 
 
 def confiscateName(id, file):
     name = id+os.path.basename(file)
@@ -47,12 +49,29 @@ def Main():
         return
 
     logging.info(f"Load INI...")
-    configfile = "Backup2Cloud.ini"
+    homefolder = os.path.join(str(Path.home()), ".Backup2Cloud")
+    if not os.path.isdir(homefolder):
+        os.makedirs(homefolder)
+    
+    GDriveAPIClient = os.path.join(homefolder, "credentials.json")
+    if not os.path.isfile(GDriveAPIClient):
+        logging.error(f"The GDrive API Client Configuration is missing!")
+        logging.error(f"   DOWNLOAD CLIENT CONFIGURATION and save the file credentials.json to")
+        logging.error(f"   {GDriveAPIClient}")
+        logging.error(f"   from https://developers.google.com/drive/api/v3/quickstart/python")
+        
+    configfile = os.path.join(homefolder, "Backup2Cloud.ini")
     logging.info(f"Using config {configfile}")
+    if not os.path.isfile(configfile):
+        scriptfolder = os.path.dirname(os.path.abspath(__file__))
+        shutil.copyfile(os.path.join(scriptfolder,"Backup2Cloud.ini"), configfile)
+        logging.error(f"Edit {configfile} first!")
+        return
+
     config = configparser.ConfigParser()
     config.read(configfile)
     for cloudplace in config.sections():
-        with GDrive(cloudplace) as gd:
+        with GDrive(cloudplace, GDriveAPIClient) as gd:
             with tempfile.TemporaryDirectory() as tempdir:
                 logging.info(f"Processing {cloudplace}")
                 zipfile = None
@@ -61,10 +80,7 @@ def Main():
                 folderval = None
 
                 for (key, val) in config.items(cloudplace):
-                    if key=="credentials":
-                        gd.connect(val)
-                        continue
-                    elif key=="packagepassword":
+                    if key=="packagepassword":
                         packagePassword = val
                         continue
                     elif key.startswith("folder"):
@@ -117,20 +133,17 @@ def Main():
 
 
 ### set up logging
-import logging, sys, socket
+import logging, sys
 
-machinename = socket.gethostname()
 logging.basicConfig(
     level=logging.DEBUG,
-    #format=f"%(message)s\t%(asctime)s\t{machinename}\t%(threadName)s\t%(levelname)s",
-    format=f"%(message)s",
+    format=f"[%(levelname)s]\t%(message)s",
     handlers=[
         #logging.FileHandler(f"{logfile}.txt"),
         logging.StreamHandler(sys.stdout)
         #TalkerHandler()
     ]
 )
-
 
 # main run
 try:

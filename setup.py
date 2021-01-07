@@ -21,8 +21,7 @@ setuptools.setup(
         'google-api-python-client',
         'google-auth-httplib2',
         'google-auth-oauthlib',
-        'py7zr',
-        'colorlog'
+        'py7zr'
        
     ],
     python_requires='>=3',

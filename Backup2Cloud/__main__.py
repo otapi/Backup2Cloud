@@ -4,6 +4,11 @@ import tempfile
 from .gdrive import GDrive
 import logging
 import py7zr
+import hashlib
+
+def confiscateName(id, file):
+    name = id+os.path.basename(file)
+    return hashlib.md5(bytes(name, 'utf-8')).hexdigest()
 
 def cliHelp():
     print("Usage:")
@@ -64,7 +69,8 @@ def Main():
                     elif key.startswith("folder"):
                         folder = val
                         id = key
-                        zipfile = os.path.join(tempdir, os.path.basename(folder))+".7z"
+                        logging.info(f"Using {folder}={id}")
+                        zipfile = os.path.join(tempdir, confiscateName(id, folder))+".7z"
                         if command == CMD_UPLOAD:
                             logging.info(f"Compressing to {zipfile}...")
                             with py7zr.SevenZipFile(zipfile, 'w', password=packagePassword) as archive:

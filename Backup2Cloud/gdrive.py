@@ -82,9 +82,16 @@ class GDrive():
         if not os.path.isfile(filepath):
             raise Exception(f"The local file to upload does not exists: {filepath}")
 
+        filename = os.path.basename(filepath)
+        exists = self.fileexists(filename)
+        if overwrite and exists:
+            logging.info(f"Already exists on GDRive, deleting: {filename}")
+            logging.debug(f"exists: {exists}")
+            self.service.files().delete(fileId=exists).execute()
+
         logging.info(f"Upload started for {filepath}...")
         media = MediaFileUpload(filepath, mimetype='application/x-7z-compressed', resumable=True)
-        request = self.service.files().create(media_body=media, body={'name': os.path.basename(filepath)})
+        request = self.service.files().create(media_body=media, body={'name': filename})
         response = None
         while response is None:
             status, response = request.next_chunk()
@@ -127,6 +134,11 @@ class GDrive():
         else:
             return False
 
+    # Return free space on the GDrive
+    def getFreespaceBytes(self):
+        storageQuota = self.service.about().get(fields="storageQuota").execute()
+        logging.debug(f"storageQuota: {storageQuota}")
+        return int(storageQuota['storageQuota']['limit'])-int(storageQuota['storageQuota']['usage'])
 
 
 

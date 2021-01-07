@@ -101,6 +101,9 @@ def Main():
                             with py7zr.SevenZipFile(localzip, mode='r', password=packagePassword) as archive:
                                 archive.extractall(destinationCurr)
                             logging.info(f"Extract done!")
+            freespace = "%.1f" % (gd.getFreespaceBytes()/(1024*1024))
+            logging.info(f"Free space on {cloudplace}: {freespace} GBytes")
+
 
 ### set up logging
 import logging, sys, socket

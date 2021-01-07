@@ -58,6 +58,7 @@ def Main():
                 zipfile = None
                 id = None
                 packagePassword = None
+                folderval = None
 
                 for (key, val) in config.items(cloudplace):
                     if key=="credentials":
@@ -68,6 +69,7 @@ def Main():
                         continue
                     elif key.startswith("folder"):
                         folder = val
+                        folderval = val
                         id = key
                         logging.info(f"Using {folder}={id}")
                         zipfile = os.path.join(tempdir, confiscateName(id, folder))+".7z"
@@ -79,6 +81,7 @@ def Main():
                             logging.info(f"Compress done!")
                     elif key.startswith("file"):
                         zipfile = val
+                        folderval = val
                         id = key
 
                     logging.debug(f"command: {command}")
@@ -92,6 +95,8 @@ def Main():
                         raise Exception(f"Either the folder or file is missing from INI for {cloudplace}")
 
                     if command == CMD_UPLOAD:
+                        size = "%.1f" % (os.path.getsize(zipfile)/(1024*1024))
+                        logging.info(f"The package takes {size} MBytes of {id}={folderval}")
                         gd.uploadfile(filepath=zipfile)
 
                     if command == CMD_DOWNLOAD:

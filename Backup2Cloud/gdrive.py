@@ -85,7 +85,7 @@ class GDrive():
         filename = os.path.basename(filepath)
         exists = self.fileexists(filename)
         if overwrite and exists:
-            logging.info(f"Already exists on GDRive, deleting: {filename}")
+            logging.info(f"Already exists on GDrive, deleting: {filename}")
             logging.debug(f"exists: {exists}")
             self.service.files().delete(fileId=exists).execute()
 

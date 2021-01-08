@@ -72,6 +72,7 @@ def Main():
         cliHelp()
         return
 
+    verdict = ""
     logging.info(f"Load INI...")
     homefolder = os.path.join(str(Path.home()), ".Backup2Cloud")
     if not os.path.isdir(homefolder):
@@ -95,6 +96,7 @@ def Main():
     config = configparser.ConfigParser()
     config.read(configfile)
     for cloudplace in config.sections():
+        verdict = "Verdict\nCPlace\tState\tID\tLocal place\tPackage size (MBytes)\n"
         with GDrive(cloudplace, GDriveAPIClient) as gd:
             with tempfile.TemporaryDirectory() as tempdir:
                 logging.info(f"Processing {cloudplace}")
@@ -132,6 +134,7 @@ def Main():
                                 
                                 if checksum == oldchecksum:
                                     logging.info(f"No changes in the package, upload skipped for: {cloudplace}|{val}")
+                                    verdict += f"{cloudplace}\tNo change\t{key}\t{val}\t#N/A\n"
                                     continue
                             
                             if isfolder:
@@ -140,33 +143,46 @@ def Main():
                                     archive.set_encrypted_header(True)
                                     archive.writeall(val, os.path.basename(val))
                                 logging.info(f"Compress done!")
-                                
+
                             size = "%.1f" % (os.path.getsize(zipfile)/(1024*1024))
                             logging.info(f"The package takes {size} MBytes of {id}={val}")
 
-
                             logging.info(f"Uploading package for: {cloudplace}|{val}")
                             gd.uploadfile(filepath=zipfile)
+                            
                             with open(checksumfilename, 'w') as f:
                                 f.write(checksum)
+                            verdict += f"{cloudplace}\tUploaded\t{key}\t{val}\t{size}\n"
+                            
                         
                         elif command == CMD_DOWNLOAD:
                             logging.debug(f"download_id: {download_id}")
-                            logging.debug(f"id: {id}")
-                            if download_id == "*" or download_id == id:
+                            logging.debug(f"val: {val}")
+                            if download_id == "*" or download_id == val:
                                 localzip = gd.downloadfile(os.path.basename(zipfile), tempdir)
-                                destinationCurr = os.path.join(destination, id)
-                                if id == "folder" or id == "file":
-                                    destinationCurr = destination
                                 
+                                
+                                size = "%.1f" % (os.path.getsize(localzip)/(1024*1024))
+                                verdict += f"{cloudplace}\tDownloaded\t{key}\t{val}\t{size}\n"
+
+                                logging.debug(f"destination: {destination}")
                                 if isfolder:
+                                    destinationCurr = destination
                                     logging.info(f"Extracting to {destinationCurr}...")
                                     with py7zr.SevenZipFile(localzip, mode='r', password=packagePassword) as archive:
                                         archive.extractall(destinationCurr)
                                     logging.info(f"Extract done!")
+                                else:
+                                    destinationCurr = os.path.join(destination, os.path.basename(val))
+                                    logging.info(f"Copy to {destinationCurr}")
+                                    shutil.copyfile(localzip, destinationCurr)
+                                    logging.info(f"File copied!")
 
             freespace = "%.1f" % (gd.getFreespaceBytes()/(1024*1024))
             logging.info(f"Free space on {cloudplace}: {freespace} GBytes")
+    
+    logging.info(f"--------")
+    logging.info(verdict)
 
 
 ### set up logging

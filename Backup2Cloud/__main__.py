@@ -12,6 +12,29 @@ def confiscateName(id, file):
     name = id+os.path.basename(file)
     return hashlib.md5(bytes(name, 'utf-8')).hexdigest()
 
+def getChecksumBigfile(file):
+    with open(file, "rb") as f:
+        file_hash = hashlib.md5()
+        while chunk := f.read(8192):
+            file_hash.update(chunk)
+    return file_hash.hexdigest()
+
+def getChecksumFolder(folder):
+    logging.info(f"Create checksum for folder: {folder}")
+    chkfile = tempfile.NamedTemporaryFile(delete=False)
+    chkfile.close()
+    count = 0
+    with open(chkfile.name, "w") as cf:
+        for dirpath, dirnames, files in os.walk(folder):
+            for name in files:
+                inst = os.path.join(dirpath, name)
+                cf.write(inst+"_"+getChecksumBigfile(inst)+"\n")
+                count = count + 1
+    logging.info(f"Cheksum done for {count} files")
+    checksum = getChecksumBigfile(chkfile.name)
+    os.remove(chkfile.name)
+    return checksum
+
 def cliHelp():
     print("Usage:")
     print("   Backup2Cloud.py [-d *|ID [destination]]")
@@ -22,6 +45,7 @@ def cliHelp():
     print("                      (or to current folder if missing)")
     print("                      e.g.: Backup2Cloud.py -d folder1")
     print("")
+
 
 CMD_UPLOAD = "CMD_UPLOAD"
 CMD_DOWNLOAD = "CMD_DOWNLOAD"
@@ -74,60 +98,73 @@ def Main():
         with GDrive(cloudplace, GDriveAPIClient) as gd:
             with tempfile.TemporaryDirectory() as tempdir:
                 logging.info(f"Processing {cloudplace}")
-                zipfile = None
-                id = None
                 packagePassword = None
-                folderval = None
-
+                
                 for (key, val) in config.items(cloudplace):
                     if key=="packagepassword":
                         packagePassword = val
                         continue
-                    elif key.startswith("folder"):
-                        folder = val
-                        folderval = val
-                        id = key
-                        logging.info(f"Using {folder}={id}")
-                        zipfile = os.path.join(tempdir, confiscateName(id, folder))+".7z"
+
+                    elif key.startswith("folder") or key.startswith("file"):
+                        if not packagePassword:
+                            raise Exception(f"Packagepassword is missing from INI for {cloudplace}")
+                        
+                        isfolder = key.startswith("folder")
+                        logging.info(f"Using {key}={val}")
+                        zipfile = os.path.join(tempdir, confiscateName(key, val))+".7z"
+
                         if command == CMD_UPLOAD:
-                            logging.info(f"Compressing to {zipfile}...")
-                            with py7zr.SevenZipFile(zipfile, 'w', password=packagePassword) as archive:
-                                archive.set_encrypted_header(True)
-                                archive.writeall(folder, os.path.basename(folder))
-                            logging.info(f"Compress done!")
-                    elif key.startswith("file"):
-                        zipfile = val
-                        folderval = val
-                        id = key
+                            checksum = None
+                            if isfolder:
+                                checksum = getChecksumFolder(val)
+                            else: 
+                                checksum = getChecksumBigfile(val)
+                            logging.debug(f"checksum: {checksum}")
 
-                    logging.debug(f"command: {command}")
-                    logging.debug(f"key: {key}")
-                    logging.debug(f"val: {val}")
+                            checksumfilename = os.path.join(homefolder, f"{cloudplace}_{os.path.basename(zipfile)}").replace(".7z", ".checksum")
 
-                    if not gd.isconnected():
-                        raise Exception(f"Credentials are missing from INI for {cloudplace}")
-                    
-                    if not zipfile:
-                        raise Exception(f"Either the folder or file is missing from INI for {cloudplace}")
+                            logging.debug(f"checksumfilename: {checksumfilename}")
+                            if gd.fileexists(os.path.basename(zipfile)) and os.path.isfile(checksumfilename):
+                                with open(checksumfilename, 'r') as f:
+                                    oldchecksum=f.read()
 
-                    if command == CMD_UPLOAD:
-                        size = "%.1f" % (os.path.getsize(zipfile)/(1024*1024))
-                        logging.info(f"The package takes {size} MBytes of {id}={folderval}")
-                        gd.uploadfile(filepath=zipfile)
+                                logging.debug(f"oldchecksum: {oldchecksum}")
+                                
+                                if checksum == oldchecksum:
+                                    logging.info(f"No changes in the package, upload skipped for: {cloudplace}|{val}")
+                                    continue
+                            
+                            if isfolder:
+                                logging.info(f"Compressing to {zipfile}...")
+                                with py7zr.SevenZipFile(zipfile, 'w', password=packagePassword) as archive:
+                                    archive.set_encrypted_header(True)
+                                    archive.writeall(val, os.path.basename(val))
+                                logging.info(f"Compress done!")
+                                
+                            size = "%.1f" % (os.path.getsize(zipfile)/(1024*1024))
+                            logging.info(f"The package takes {size} MBytes of {id}={val}")
 
-                    if command == CMD_DOWNLOAD:
-                        logging.debug(f"download_id: {download_id}")
-                        logging.debug(f"id: {id}")
-                        if download_id == "*" or download_id == id:
-                            localzip = gd.downloadfile(os.path.basename(zipfile), tempdir)
-                            destinationCurr = os.path.join(destination, id)
-                            if id == "folder" or id == "file":
-                                destinationCurr = destination
 
-                            logging.info(f"Extracting to {destinationCurr}...")
-                            with py7zr.SevenZipFile(localzip, mode='r', password=packagePassword) as archive:
-                                archive.extractall(destinationCurr)
-                            logging.info(f"Extract done!")
+                            logging.info(f"Uploading package for: {cloudplace}|{val}")
+                            gd.uploadfile(filepath=zipfile)
+                            with open(checksumfilename, 'w') as f:
+                                f.write(checksum)
+                        
+                        elif command == CMD_DOWNLOAD:
+                            logging.debug(f"download_id: {download_id}")
+                            logging.debug(f"id: {id}")
+                            if download_id == "*" or download_id == id:
+                                localzip = gd.downloadfile(os.path.basename(zipfile), tempdir)
+                                destinationCurr = os.path.join(destination, id)
+                                if id == "folder" or id == "file":
+                                    destinationCurr = destination
+                                
+                                if isfolder:
+                                    logging.info(f"Extracting to {destinationCurr}...")
+                                    with py7zr.SevenZipFile(localzip, mode='r', password=packagePassword) as archive:
+                                        archive.extractall(destinationCurr)
+                                    logging.info(f"Extract done!")
+
             freespace = "%.1f" % (gd.getFreespaceBytes()/(1024*1024))
             logging.info(f"Free space on {cloudplace}: {freespace} GBytes")
 

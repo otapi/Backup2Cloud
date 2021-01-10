@@ -25,4 +25,8 @@ setuptools.setup(
        
     ],
     python_requires='>=3',
+    package_data={
+        # If any package contains *.txt files, include them:
+        "": ["*.ini"],
+    }
 ) 

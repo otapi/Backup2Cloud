@@ -1,21 +1,41 @@
 # Backup 2 Cloud
-Backup specific folders to and upload to a cloud provider
+Backup specific folders to and upload to a cloud provider. The uploaded files are 7zipped and encrypted locally. Uploads only those packages which were changed since last backup.
 
-## Install
+Currently only Google Drive is supported, but can handle more accounts.
+## Install and Setup
+Install the package via pip:
 `python -m pip install Backup2Cloud`
 
-Enable the Drive API via:
+Run first time:
+`python -m Backup2Cloud`
+
+Enable the Google Drive API via:
 https://developers.google.com/drive/api/v3/quickstart/python
-In resulting dialog click DOWNLOAD CLIENT CONFIGURATION and save the file credentials.json to your working directory. 
+(Or you can manage your already exisiting Google APIs here: https://console.developers.google.com/apis/)
+In resulting dialog click DOWNLOAD CLIENT CONFIGURATION and save the file credentials.json to your home directory (as shown on the first run above). 
 
-Or you can manage your already exisiting Google APIs here: https://console.developers.google.com/apis/
+Open with a texteditor the ini file at your home directory (as shown on the first run above). 
+Follow notes in the ini file and setup one or more places to backup.
 
-At first run, let's follow the url (or open on a separated device) to authorize the API: 'Please visit this URL to authorize this application'
-
+Run the tool second time:
+`python -m Backup2Cloud`
+Let's follow the url (or open on a separated device) to authorize the API for each cloudspace sections: 'Please visit this URL to authorize this application'. Complete the authorizes in a browser, even on other machine.
 
 ## Usage
-Set up INI file
+`Backup2Cloud.py [-d *|ID [destination]]")`
+`                default: upload the packaged folders to cloud")`
+`     -d * [destination]: download and extract all entries of the INI to Folder")`
+`                         (or to current folder if missing)")`
+`    -d ID [destination]: download and extract specified ID entry of the INI to Folder")`
+`                         (or to current folder if missing)")`
+`                         e.g.: Backup2Cloud.py -d folder1")`
 
-Run a backup:
+Run a backup manually:
 `python -m Backup2Cloud`
 Or add the backup run to scheduler (e.g. cron)
+
+Restore all backups manually to current folder:
+`python -m Backup2Cloud -d *`
+
+
+

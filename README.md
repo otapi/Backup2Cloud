@@ -25,13 +25,19 @@ Run the tool second time:
 Let's follow the url (or open on a separated device) to authorize the API for each cloudspace sections: 'Please visit this URL to authorize this application'. Complete the authorizes in a browser, even on other machine.
 
 ## Usage
-`Backup2Cloud.py [-d *|ID [destination]]")
-                default: upload the packaged folders to cloud")
-     -d * [destination]: download and extract all entries of the INI to Folder")
-                         (or to current folder if missing)")
-    -d ID [destination]: download and extract specified ID entry of the INI to Folder")
-                         (or to current folder if missing)")
-                         e.g.: Backup2Cloud.py -d folder1")`
+`Backup2Cloud.py [-d *|ID [destination]]")`
+
+`                default: upload the packaged folders to cloud")`
+
+`     -d * [destination]: download and extract all entries of the INI to Folder")`
+
+`                         (or to current folder if missing)")`
+
+`    -d ID [destination]: download and extract specified ID entry of the INI to Folder")`
+
+`                         (or to current folder if missing)")`
+
+`                         e.g.: Backup2Cloud.py -d folder1")`
 
 
 Run a backup manually:

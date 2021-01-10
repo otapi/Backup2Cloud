@@ -3,6 +3,7 @@ Backup specific folders and upload to a cloud provider. The uploaded files are 7
 
 Currently only Google Drive is supported, but can handle more accounts.
 ## Install and Setup
+Requirements: Python 3.6.
 Install the package via pip:
 
 `python -m pip install Backup2Cloud`
@@ -25,30 +26,26 @@ Run the tool second time:
 Let's follow the url (or open on a separated device) to authorize the API for each cloudspace sections: 'Please visit this URL to authorize this application'. Complete the authorizes in a browser, even on other machine.
 
 ## Usage
-`Backup2Cloud.py [-d *|ID [destination]]")`
-
-`                default: upload the packaged folders to cloud")`
-
-`     -d * [destination]: download and extract all entries of the INI to Folder")`
-
-`                         (or to current folder if missing)")`
-
-`    -d ID [destination]: download and extract specified ID entry of the INI to Folder")`
-
-`                         (or to current folder if missing)")`
-
-`                         e.g.: Backup2Cloud.py -d folder1")`
-
-
-Run a backup manually:
+Run a backup manually, or add the backup run to scheduler (e.g. cron):
 
 `python -m Backup2Cloud`
-
-Or add the backup run to scheduler (e.g. cron)
 
 Restore all backups manually to current folder:
 
 `python -m Backup2Cloud -d *`
+
+Command line interface:
+
+`Backup2Cloud.py [-d *|ID [destination]]")
+                default: upload the packaged folders to cloud")
+     -d * [destination]: download and extract all entries of the INI to Folder")
+                         (or to current folder if missing)")
+    -d ID [destination]: download and extract specified ID entry of the INI to Folder")
+                         (or to current folder if missing)")
+                         e.g.: Backup2Cloud.py -d folder1")`
+
+
+
 
 
 

@@ -1,7 +1,7 @@
 # Backup 2 Cloud
 Backup specific folders and upload to a cloud provider. The uploaded files are 7zipped and encrypted locally. Uploads only those packages which were changed since last backup.
 
-Currently only Google Drive is supported, but can handle more accounts.
+Currently only Google Drive is supported, but can handle multiple accounts.
 ## Install and Setup
 Requirements: Python 3.6.
 Install the package via pip:

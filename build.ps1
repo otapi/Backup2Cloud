@@ -9,4 +9,4 @@ python setup.py sdist bdist_wheel
 
 #upload package
 python -m pip install --user --upgrade twine
-python -m twine upload -u __token__ dist/*
+python -m twine upload dist/*

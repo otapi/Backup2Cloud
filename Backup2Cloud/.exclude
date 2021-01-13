@@ -1,0 +1,7 @@
+# List folders and/or files to ignore for Backup2Cloud.
+# Use same format as gitignore
+
+# Ignore files Syncthing:
+.stfolder/
+.stversions/
+Synch.Cache/

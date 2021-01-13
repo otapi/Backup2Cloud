@@ -21,7 +21,8 @@ setuptools.setup(
         'google-api-python-client',
         'google-auth-httplib2',
         'google-auth-oauthlib',
-        'py7zr'
+        'py7zr',
+        'dirtools'
        
     ],
     python_requires='>=3.7.3',

@@ -7,6 +7,7 @@ import py7zr
 import hashlib
 from pathlib import Path
 import shutil 
+from dirtools import Dir
 
 def confiscateName(id, file):
     name = id+os.path.basename(file)
@@ -21,22 +22,6 @@ def getChecksumBigfile(file):
                 break
             file_hash.update(chunk)
     return file_hash.hexdigest()
-
-def getChecksumFolder(folder):
-    logging.info(f"Create checksum for folder: {folder}")
-    chkfile = tempfile.NamedTemporaryFile(delete=False)
-    chkfile.close()
-    count = 0
-    with open(chkfile.name, "w") as cf:
-        for dirpath, dirnames, files in os.walk(folder):
-            for name in files:
-                inst = os.path.join(dirpath, name)
-                cf.write(inst+"_"+getChecksumBigfile(inst)+"\n")
-                count = count + 1
-    logging.info(f"Cheksum done for {count} files")
-    checksum = getChecksumBigfile(chkfile.name)
-    os.remove(chkfile.name)
-    return checksum
 
 def cliHelp():
     print("Usage:")
@@ -89,12 +74,17 @@ def Main():
         logging.error(f"   from https://developers.google.com/drive/api/v3/quickstart/python")
         
     configfile = os.path.join(homefolder, "Backup2Cloud.ini")
+    ignorefile = os.path.join(homefolder, ".exclude")
     logging.info(f"Using config {configfile}")
     if not os.path.isfile(configfile):
         scriptfolder = os.path.dirname(os.path.abspath(__file__))
         shutil.copyfile(os.path.join(scriptfolder,"Backup2Cloud.ini"), configfile)
-        logging.error(f"Edit {configfile} first!")
+        shutil.copyfile(os.path.join(scriptfolder,".exclude"), configfile)
+        logging.error(f"Edit {configfile} first! You can also edit the exclude file here {ignorefile}")
         return
+    
+    if not os.path.isfile(ignorefile):
+        ignorefile = None
 
     config = configparser.ConfigParser()
     config.read(configfile)
@@ -121,7 +111,8 @@ def Main():
                         if command == CMD_UPLOAD:
                             checksum = None
                             if isfolder:
-                                checksum = getChecksumFolder(val)
+                                d = Dir(val)
+                                checksum = d.hash()
                             else: 
                                 checksum = getChecksumBigfile(val)
                             logging.debug(f"checksum: {checksum}")
@@ -142,9 +133,13 @@ def Main():
                             
                             if isfolder:
                                 logging.info(f"Compressing to {zipfile}...")
+
+                                d = Dir(val, exclude_file=ignorefile)
                                 with py7zr.SevenZipFile(zipfile, 'w', password=packagePassword) as archive:
                                     archive.set_encrypted_header(True)
-                                    archive.writeall(val, os.path.basename(val))
+                                    for foldername, subfolders, filenames in d.walk():
+                                        for filename in filenames:
+                                            archive.write(os.path.join(foldername, filename), arcname=os.path.join(os.path.relpath(foldername, os.path.dirname(val)), filename))
                                 logging.info(f"Compress done!")
 
                             size = "%.1f" % (os.path.getsize(zipfile)/(1024*1024))

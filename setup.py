@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="Backup2Cloud",
-    version="1.0.0",
+    version="1.0.1",
     author="otapi",
     description="Backup specific folders to and upload to a cloud provider",
     long_description=long_description,
@@ -24,7 +24,7 @@ setuptools.setup(
         'py7zr'
        
     ],
-    python_requires='>=3',
+    python_requires='>=3.7.3',
     package_data={
         # If any package contains *.txt files, include them:
         "": ["*.ini"],

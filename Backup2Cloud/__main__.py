@@ -15,7 +15,10 @@ def confiscateName(id, file):
 def getChecksumBigfile(file):
     with open(file, "rb") as f:
         file_hash = hashlib.md5()
-        while chunk := f.read(8192):
+        while True:
+            chunk = f.read(8192)
+            if not chunk:
+                break
             file_hash.update(chunk)
     return file_hash.hexdigest()
 

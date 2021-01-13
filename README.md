@@ -3,8 +3,11 @@ Backup specific folders and upload to a cloud provider. The uploaded files are 7
 
 Currently only Google Drive is supported, but can handle multiple accounts.
 ## Install and Setup
-Requirements: Python 3.6.
-Install the package via pip:
+Requirements: Python 3.7 with pip and setuptools. If not installed, do it on Debian:
+
+`sudo apt install python3-venv python3-pip python3-setuptools`
+
+Install the tool's package via pip:
 
 `python -m pip install Backup2Cloud`
 

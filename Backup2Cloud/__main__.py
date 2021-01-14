@@ -8,14 +8,12 @@ import py7zr
 import hashlib
 from pathlib import Path
 import shutil 
-from dirtools import Dir
+from dirtools2.dirtools2 import Dir
 
 def formatSize(bytes):
-    try:
-        bytes = float(bytes)
-        kb = bytes / 1024
-    except:
-        return "Error"
+    logging.debug(f"bytes: {bytes}")
+    bytes = float(bytes)
+    kb = bytes / 1024
     if kb >= 1024:
         M = kb / 1024
         if M >= 1024:
@@ -100,11 +98,11 @@ def Main():
     config.read(configfile)
     for cloudplace in config.sections():
         verdict = "Verdict\nCPlace\tState\tID\tLocal place\tPackage size\n"
-        with tempfile.TemporaryDirectory() as tempdir:
-            logging.info(f"Processing {cloudplace}")
-            packagePassword = None
-            provider = providers.ProvidersInterface(None)
+        logging.info(f"Processing {cloudplace}")
+        packagePassword = None
+        provider = providers.ProvidersInterface(None)
 
+        with tempfile.TemporaryDirectory() as tempdir:
             for (key, val) in config.items(cloudplace):
                 if key=="type":
                     if val=="GDrive":
@@ -123,6 +121,9 @@ def Main():
                 
                 # Folders or files
                 elif key.startswith("folder") or key.startswith("file"):
+                    if not provider.getName():
+                        raise Exception(f"Type is missing from INI for {cloudplace}")
+
                     if not packagePassword:
                         raise Exception(f"Packagepassword is missing from INI for {cloudplace}")
                     
@@ -150,7 +151,7 @@ def Main():
                             
                             if checksum == oldchecksum:
                                 logging.info(f"No changes in the package, upload skipped for: {cloudplace}|{val}")
-                                verdict += f"{cloudplace}\tNo change\t{key}\t{val}\t#N/A\n"
+                                verdict += f"{cloudplace}\tNo change\t{key}\t{val}\tskipped\n"
                                 continue
                         
                         if isfolder:

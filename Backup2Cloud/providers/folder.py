@@ -56,8 +56,22 @@ class Folder(ProvidersInterface):
         logging.info(f"File copied!")
         return destination
         
-    def getFreespaceBytes(self):
+    def getFreespaceBytes(self) -> int:
         """Return the available free space on the provider"""
         usage = shutil.disk_usage(self.target)
         return usage[2]
+
+    def fileexists(self, filename):
+        """ Check if file exists with exact name on provider. Returns the full path of the file if yes."""
+        targetfile = os.path.join(self.target, filename)
+        if os.path.isfile(targetfile):
+            return targetfile
+        else:
+            return None
+
+    def getName(self) -> str:
+        """Get providers name. Returns None if it was not properly initialized"""
+        return self.name
+
+
 

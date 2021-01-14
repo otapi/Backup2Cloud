@@ -137,13 +137,16 @@ class GDrive(ProvidersInterface):
             return True
         else:
             return False
-
     
-    def getFreespaceBytes(self):
+    def getFreespaceBytes(self) -> int:
         """Return free space on the GDrive"""
         storageQuota = self.service.about().get(fields="storageQuota").execute()
         logging.debug(f"storageQuota: {storageQuota}")
         return int(storageQuota['storageQuota']['limit'])-int(storageQuota['storageQuota']['usage'])
+
+    def getName(self) -> str:
+        """Get providers name. Returns None if it was not properly initialized"""
+        return self.name
 
 
 

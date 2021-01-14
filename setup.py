@@ -22,7 +22,7 @@ setuptools.setup(
         'google-auth-httplib2',
         'google-auth-oauthlib',
         'py7zr',
-        'dirtools'
+        'dirtools2'
        
     ],
     python_requires='>=3.7.3',

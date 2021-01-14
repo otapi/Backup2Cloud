@@ -14,6 +14,13 @@ class GDrive(ProvidersInterface):
     def __init__(self, name, credentialfile):
         self.name = name
         self.service = None
+        if not os.path.isfile(credentialfile):
+            logging.error(f"The GDrive API Client Configuration is missing!")
+            logging.error(f"   DOWNLOAD CLIENT CONFIGURATION and save the file credentials.json to")
+            logging.error(f"   {credentialfile}")
+            logging.error(f"   from https://developers.google.com/drive/api/v3/quickstart/python")
+            raise Exception("The GDrive API Client Configuration is missing")
+    
         self.picklefile=os.path.join(os.path.dirname(credentialfile), f"{self.name}_token.pickle")
         self.connect(credentialfile)
 

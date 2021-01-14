@@ -82,13 +82,6 @@ def Main():
     homefolder = os.path.join(str(Path.home()), ".Backup2Cloud")
     if not os.path.isdir(homefolder):
         os.makedirs(homefolder)
-    
-    GDriveAPIClient = os.path.join(homefolder, "credentials.json")
-    if not os.path.isfile(GDriveAPIClient):
-        logging.error(f"The GDrive API Client Configuration is missing!")
-        logging.error(f"   DOWNLOAD CLIENT CONFIGURATION and save the file credentials.json to")
-        logging.error(f"   {GDriveAPIClient}")
-        logging.error(f"   from https://developers.google.com/drive/api/v3/quickstart/python")
         
     configfile = os.path.join(homefolder, "Backup2Cloud.ini")
     ignorefile = os.path.join(homefolder, ".exclude")
@@ -115,7 +108,7 @@ def Main():
             for (key, val) in config.items(cloudplace):
                 if key=="type":
                     if val=="GDrive":
-                        provider = providers.GDrive(cloudplace, GDriveAPIClient)
+                        provider = providers.GDrive(cloudplace, os.path.join(homefolder, "credentials.json"))
                     elif val=="Folder":
                         provider = providers.Folder(cloudplace)
                     continue

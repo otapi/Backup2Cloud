@@ -17,11 +17,6 @@ Run first time:
 
 `python -m Backup2Cloud`
 
-Enable the Google Drive API via:
-https://developers.google.com/drive/api/v3/quickstart/python
-(Or you can manage your already exisiting Google APIs here: https://console.developers.google.com/apis/)
-In resulting dialog click DOWNLOAD CLIENT CONFIGURATION and save the file credentials.json to your home directory (as shown on the first run above). 
-
 ### INI file
 Open with a texteditor the ini file at your home directory (as shown on the first run above). 
 Follow notes in the ini file and setup one or more places to backup.
@@ -29,6 +24,12 @@ Follow notes in the ini file and setup one or more places to backup.
 ### .exclude file
 If you want to exclude subfolders or files, you can specify them by the same patterns as .gitignore files. Open with a texteditor the .exclude file at your home directory (as shown on the first run above). 
 Follow notes in the .exclude file and add folder/file patterns to exclude
+
+### Enable Google Drive API
+Enable the OAuth Client ID at Google Drive API via:
+https://developers.google.com/drive/api/v3/quickstart/python
+(Or you can manage your already exisiting Google APIs here: https://console.developers.google.com/apis/)
+In resulting dialog click DOWNLOAD CLIENT CONFIGURATION and save the file credentials.json to your home directory (as shown on the first run above). 
 
 Run the tool second time:
 `python -m Backup2Cloud`

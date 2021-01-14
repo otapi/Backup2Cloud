@@ -5,9 +5,12 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from googleapiclient.http import MediaFileUpload, MediaIoBaseDownload
 import logging
+from .providersinterface import ProvidersInterface
 
-# Class to upload, download and list files on Google Drive.
-class GDrive():
+
+class GDrive(ProvidersInterface):
+    """Class to upload, download and list files on Google Drive."""
+
     def __init__(self, name, credentialfile):
         self.name = name
         self.service = None
@@ -39,10 +42,7 @@ class GDrive():
         self.service = build('drive', 'v3', credentials=creds, cache_discovery=False)
         logging.info(f"Connected!")
 
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc_value, traceback):
+    def close(self):
         if self.service:
             self.service.close()
 
@@ -96,8 +96,8 @@ class GDrive():
                 print("Uploaded %d%%." % int(status.progress() * 100))
             logging.info(f"Upload Complete!")
 
-    # Download the specified file from GDrive to the specified local folder. Returns the local filepath.
     def downloadfile(self, filename, localfolder):
+        """Download the specified file from GDrive to the specified local folder. Returns the local filepath."""
         if not self.service:
             raise Exception("Call Connect before start using GDrive")
 
@@ -131,8 +131,9 @@ class GDrive():
         else:
             return False
 
-    # Return free space on the GDrive
+    
     def getFreespaceBytes(self):
+        """Return free space on the GDrive"""
         storageQuota = self.service.about().get(fields="storageQuota").execute()
         logging.debug(f"storageQuota: {storageQuota}")
         return int(storageQuota['storageQuota']['limit'])-int(storageQuota['storageQuota']['usage'])

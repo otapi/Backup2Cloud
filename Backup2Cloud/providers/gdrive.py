@@ -35,7 +35,7 @@ class GDrive(ProvidersInterface):
                 creds = pickle.load(token)
         
         if not creds or not creds.valid:
-            logging.warning(f"There are no (valid) credentials available, the user should log in.") 
+            logging.warning(f"There are no (valid) credentials available, the user may need to log in.") 
             if creds and creds.expired and creds.refresh_token:
                 creds.refresh(Request())
             else:

@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="Backup2Cloud",
-    version="1.0.5",
+    version="1.0.8",
     author="otapi",
     description="Backup specific folders to and upload to a cloud provider",
     long_description=long_description,

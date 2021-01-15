@@ -117,13 +117,23 @@ def Main():
 
     config = configparser.ConfigParser()
     config.read(configfile)
+    tempdirname = None
+    if config.has_option('Options', 'tempdir'):
+        tempdirname=config['Options']['tempdir']
+        logging.debug(f"Using custom temporary folder: {tempdirname}")
+        if not os.path.isdir(tempdirname):
+            os.makedirs(tempdirname)
+
     for cloudplace in config.sections():
+        if cloudplace=="Options":
+            continue
+        
         verdict = "Verdict\nCPlace\tState\tID\tLocal place\tPackage size\n"
         logging.info(f"Processing {cloudplace}")
         packagePassword = None
         provider = providers.ProvidersInterface(None)
 
-        with tempfile.TemporaryDirectory() as tempdir:
+        with tempfile.TemporaryDirectory(dir=tempdirname) as tempdir:
             for (key, val) in config.items(cloudplace):
                 if key=="type":
                     if val=="GDrive":
@@ -183,7 +193,7 @@ def Main():
                                 archive.set_encrypted_header(True)
                                 for foldername, subfolders, filenames in d.walk():
                                     for filename in filenames:
-                                        print(f"  adding {filename}")
+                                        logging.debug(f"  adding {filename}")
                                         archive.write(os.path.join(foldername, filename), arcname=os.path.join(os.path.relpath(foldername, os.path.dirname(val)), filename))
                                         
                             logging.info(f"Compress done!")

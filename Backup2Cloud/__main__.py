@@ -162,7 +162,9 @@ def Main():
                                 archive.set_encrypted_header(True)
                                 for foldername, subfolders, filenames in d.walk():
                                     for filename in filenames:
+                                        print(f"  adding {filename}")
                                         archive.write(os.path.join(foldername, filename), arcname=os.path.join(os.path.relpath(foldername, os.path.dirname(val)), filename))
+                                        
                             logging.info(f"Compress done!")
 
                         size = formatSize(os.path.getsize(zipfile))

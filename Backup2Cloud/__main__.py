@@ -9,6 +9,8 @@ import hashlib
 from pathlib import Path
 import shutil 
 from dirtools2.dirtools2 import Dir
+import argparse
+import logging, sys
 
 def formatSize(bytes):
     logging.debug(f"bytes: {bytes}")
@@ -50,31 +52,50 @@ def cliHelp():
     print("")
 
 
-CMD_UPLOAD = "CMD_UPLOAD"
-CMD_DOWNLOAD = "CMD_DOWNLOAD"
+CMD_UPLOAD = "Upload"
+CMD_DOWNLOAD = "Download"
 
 def Main():
-    logging.info(f"Backup2Cloud - Backup specific folders to and upload to a cloud provider")
+    print(f"Backup2Cloud - Backup specific folders to and upload to a cloud provider")
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('destination', nargs='?', default=os.getcwd(),
+                        help='Optional destination folder at Download mode. Example: C:\output, default=current folder')
+    parser.add_argument( '-d',
+                        '--download',
+                        help='Download and extract all (*) or only the specified ID entry of the INI to Destination folder. Example: -d folder1' )
+    parser.add_argument( '-log',
+                        '--loglevel',
+                        default='info',
+                        help='Provide logging level. Example --loglevel debug, default=info' )
+    args = parser.parse_args()
+
+    logging.basicConfig(
+        level=args.loglevel.upper(),
+        format=f"[%(levelname)s]\t%(message)s",
+        handlers=[
+            #logging.FileHandler(f"{logfile}.txt"),
+            logging.StreamHandler(sys.stdout)
+            #TalkerHandler()
+        ]
+    )
+
+    if not args.loglevel.upper()=="INFO":
+        logging.info(f'Logging level changed to: {args.loglevel.upper()}')
 
     command = None
-    if len(sys.argv)==1:
-        command = CMD_UPLOAD
-    
     download_id = None
-    destination = os.getcwd()
-    if len(sys.argv)>2:
-        if sys.argv[1] == "-d":
-            command = CMD_DOWNLOAD
-            download_id = sys.argv[2]
-            if len(sys.argv)>3:
-                destination = sys.argv[3]
-            if not os.path.isdir(destination):
-                os.makedirs(destination)
-            
-    if not command:
-        cliHelp()
-        return
+    destination = args.destination
 
+    if args.download:
+        command = CMD_DOWNLOAD
+        download_id = args.download
+        if not os.path.isdir(destination):
+            os.makedirs(destination)
+    else:
+        command = CMD_UPLOAD
+
+    logging.info(f"Mode: {command}")
     verdict = ""
     logging.info(f"Load INI...")
     homefolder = os.path.join(str(Path.home()), ".Backup2Cloud")
@@ -207,23 +228,5 @@ def Main():
     logging.info(f"--------")
     logging.info(verdict)
 
-
-### set up logging
-import logging, sys
-
-logging.basicConfig(
-    level=logging.DEBUG,
-    format=f"[%(levelname)s]\t%(message)s",
-    handlers=[
-        #logging.FileHandler(f"{logfile}.txt"),
-        logging.StreamHandler(sys.stdout)
-        #TalkerHandler()
-    ]
-)
-
-# main run
-try:
-    Main()
-except Exception:
-    logging.exception("Fatal error")
+Main()
 

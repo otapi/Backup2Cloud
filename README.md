@@ -47,16 +47,21 @@ Restore all backups manually to current folder:
 
 Command line interface:
 
-`Backup2Cloud.py [-d *|ID [destination]]")
-                default: upload the packaged folders to cloud")
-     -d * [destination]: download and extract all entries of the INI to Folder")
-                         (or to current folder if missing)")
-    -d ID [destination]: download and extract specified ID entry of the INI to Folder")
-                         (or to current folder if missing)")
-                         e.g.: Backup2Cloud.py -d folder1")`
+```
+Backup2Cloud - Backup specific folders to and upload to a cloud provider
+usage: __main__.py [-h] [-d DOWNLOAD] [-log LOGLEVEL] [destination]
 
+positional arguments:
+  destination           Optional destination folder at Download mode. Example:
+                        C:\output, default=current folder
 
-
-
-
-
+optional arguments:
+  -h, --help            show this help message and exit
+  -d DOWNLOAD, --download DOWNLOAD
+                        Download and extract all (*) or only the specified ID
+                        entry of the INI to Destination folder. Example: -d
+                        folder1
+  -log LOGLEVEL, --loglevel LOGLEVEL
+                        Provide logging level. Example --loglevel debug,
+                        default=info
+```

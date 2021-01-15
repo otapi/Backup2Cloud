@@ -51,7 +51,7 @@ class Folder(ProvidersInterface):
         if os.path.exists(destination):
             raise Exception(f"Local file is already exists: {destination}")
         
-        logging.info(f"Copy started for {filename}...")
+        logging.info(f"Copy started for {destination}...")
         shutil.copyfile(targetfile, destination)
         logging.info(f"File copied!")
         return destination

@@ -73,5 +73,8 @@ class Folder(ProvidersInterface):
         """Get providers name. Returns None if it was not properly initialized"""
         return self.name
 
+    def close(self):
+        """Close any living connections with the provider"""
+        pass
 
 

@@ -189,7 +189,7 @@ def Main():
                             logging.info(f"Compress done!")
 
                         size = formatSize(os.path.getsize(zipfile))
-                        logging.info(f"The package takes {size} of {id}={val}")
+                        logging.info(f"The package takes {size} of {download_id}={val}")
 
                         logging.info(f"Uploading package for: {cloudplace}|{val}")
                         provider.uploadfile(filepath=zipfile)

@@ -53,8 +53,8 @@ def Main():
                         help='Download and extract all (*) or only the specified ID entry of the INI to Destination folder. Example: -d folder1' )
     parser.add_argument( '-log',
                         '--loglevel',
-                        default='warning',
-                        help='Provide logging level. Example --loglevel debug, default=warning' )
+                        default='info',
+                        help='Provide logging level. Example --loglevel debug, default=info' )
     args = parser.parse_args()
 
     logging.basicConfig(
@@ -115,10 +115,11 @@ def Main():
         if cloudplace=="Options":
             continue
         
-        verdict = "Verdict\nCPlace\tState\tID\tLocal place\tPackage size\n"
+        verdict = "Verdict\nCPlace\tState\tID\tConfiscated name\tLocal place\tPackage size\n"
         logging.info(f"Processing {cloudplace}")
         packagePassword = None
         provider = providers.ProvidersInterface(None)
+        sumsize = 0
 
         with tempfile.TemporaryDirectory(dir=tempdirname) as tempdir:
             for (key, val) in config.items(cloudplace):
@@ -166,7 +167,7 @@ def Main():
                             
                             if checksum == oldchecksum:
                                 logging.info(f"No changes in the package, upload skipped for: {cloudplace}|{val}")
-                                verdict += f"{cloudplace}\tNo change\t{key}\t{val}\tskipped\n"
+                                verdict += f"{cloudplace}\tNo change\t{key}\t{os.path.basename(zipfile)}\t{val}\tskipped\n"
                                 continue
                         
                         size = 0
@@ -188,14 +189,15 @@ def Main():
                             zipfile = val
 
                         size = formatSize(os.path.getsize(zipfile))
+                        sumsize += os.path.getsize(zipfile)
                         
-                        logging.info(f"The package takes {size} of {download_id}={val}")
-                        logging.info(f"Uploading package for: {cloudplace}|{val}")
+                        logging.info(f"The package takes {size}")
+                        logging.info(f"Uploading package for: {cloudplace}|{key}={val}")
                         provider.uploadfile(filepath=zipfile)
                         
                         with open(checksumfilename, 'w') as f:
                             f.write(checksum)
-                        verdict += f"{cloudplace}\tUploaded\t{key}\t{val}\t{size}\n"
+                        verdict += f"{cloudplace}\tUploaded\t{key}\t{os.path.basename(zipfile)}\t{val}\t{size}\n"
                     
                     elif command == CMD_DOWNLOAD:
                         logging.debug(f"download_id: {download_id}")
@@ -204,7 +206,7 @@ def Main():
                             localzip = provider.downloadfile(os.path.basename(zipfile), tempdir)
                             
                             size = formatSize(os.path.getsize(localzip))
-                            verdict += f"{cloudplace}\tDownloaded\t{key}\t{val}\t{size}\n"
+                            verdict += f"{cloudplace}\tDownloaded\t{key}\t{os.path.basename(zipfile)}\t{val}\t{size}\n"
 
                             logging.debug(f"destination: {destination}")
                             if isfolder:
@@ -221,10 +223,11 @@ def Main():
 
         freespace = formatSize(provider.getFreespaceBytes())
         logging.info(f"Free space on {cloudplace}: {freespace}")
+        verdict += f"{cloudplace}\tAll packages on {cloudplace} take {formatSize(sumsize)} of {freespace}\t\t\t\t\n"
         provider.close()
     
     logging.info(f"--------")
-    logging.info(verdict)
+    logging.warning(verdict)
 
 Main()
 

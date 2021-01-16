@@ -196,14 +196,13 @@ def Main():
                                     for filename in filenames:
                                         logging.debug(f"  adding {filename}")
                                         archive.write(os.path.join(foldername, filename), arcname=os.path.join(os.path.relpath(foldername, os.path.dirname(val)), filename))
-                                        
                             logging.info(f"Compress done!")
-                            size = formatSize(os.path.getsize(zipfile))
                         else:
-                            size = formatSize(os.path.getsize(val))
+                            zipfile = val
 
+                        size = formatSize(os.path.getsize(zipfile))
+                        
                         logging.info(f"The package takes {size} of {download_id}={val}")
-
                         logging.info(f"Uploading package for: {cloudplace}|{val}")
                         provider.uploadfile(filepath=zipfile)
                         

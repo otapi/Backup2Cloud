@@ -182,6 +182,7 @@ def Main():
                                 verdict += f"{cloudplace}\tNo change\t{key}\t{val}\tskipped\n"
                                 continue
                         
+                        size = 0
                         if isfolder:
                             if not packagePassword:
                                 raise Exception(f"Packagepassword is missing from INI for {cloudplace}")
@@ -197,8 +198,10 @@ def Main():
                                         archive.write(os.path.join(foldername, filename), arcname=os.path.join(os.path.relpath(foldername, os.path.dirname(val)), filename))
                                         
                             logging.info(f"Compress done!")
+                            size = formatSize(os.path.getsize(zipfile))
+                        else:
+                            size = formatSize(os.path.getsize(val))
 
-                        size = formatSize(os.path.getsize(zipfile))
                         logging.info(f"The package takes {size} of {download_id}={val}")
 
                         logging.info(f"Uploading package for: {cloudplace}|{val}")
@@ -213,7 +216,6 @@ def Main():
                         logging.debug(f"val: {val}")
                         if download_id == "*" or download_id == val:
                             localzip = provider.downloadfile(os.path.basename(zipfile), tempdir)
-                            
                             
                             size = formatSize(os.path.getsize(localzip))
                             verdict += f"{cloudplace}\tDownloaded\t{key}\t{val}\t{size}\n"

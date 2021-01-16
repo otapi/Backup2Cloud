@@ -155,9 +155,6 @@ def Main():
                     if not provider.getName():
                         raise Exception(f"Type is missing from INI for {cloudplace}")
 
-                    if not packagePassword:
-                        raise Exception(f"Packagepassword is missing from INI for {cloudplace}")
-                    
                     isfolder = key.startswith("folder")
                     logging.info(f"Using {key}={val}")
                     zipfile = os.path.join(tempdir, confiscateName(key, val))+".7z"
@@ -186,6 +183,9 @@ def Main():
                                 continue
                         
                         if isfolder:
+                            if not packagePassword:
+                                raise Exception(f"Packagepassword is missing from INI for {cloudplace}")
+
                             logging.info(f"Compressing to {zipfile}...")
 
                             d = Dir(val, exclude_file=ignorefile)

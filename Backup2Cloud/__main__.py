@@ -1,6 +1,5 @@
 import configparser
 import os
-from queue import PriorityQueue
 import tempfile
 from . import providers
 import logging

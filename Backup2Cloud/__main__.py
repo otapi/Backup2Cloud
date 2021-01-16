@@ -19,11 +19,11 @@ def formatSize(bytes):
         M = kb / 1024
         if M >= 1024:
             G = M / 1024
-            return "%.2fGB" % (G)
+            return "%.2fGBytes" % (G)
         else:
-            return "%.2fMB" % (M)
+            return "%.2fMBytes" % (M)
     else:
-        return "%.2fKB" % (kb)
+        return "%.2fKBytes" % (kb)
         
 def confiscateName(id, file):
     name = id+os.path.basename(file)

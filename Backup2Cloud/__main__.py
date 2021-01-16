@@ -119,6 +119,7 @@ def Main():
                     provider = providers.GDrive(cloudplace, os.path.join(homefolder, "credentials.json"))
                     freespace = formatSize(provider.getFreespaceBytes())
                     logging.info(f"Free space on {cloudplace}: {freespace}")
+                    provider.close()
 
     for cloudplace in config.sections():
         if cloudplace=="Options":

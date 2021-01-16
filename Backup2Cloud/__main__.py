@@ -39,18 +39,6 @@ def getChecksumBigfile(file):
             file_hash.update(chunk)
     return file_hash.hexdigest()
 
-def cliHelp():
-    print("Usage:")
-    print("   Backup2Cloud.py [-d *|ID [destination]]")
-    print("             default: upload the packaged folders to cloud")
-    print("       -d * [destination]: download and extract all entries of the INI to Folder")
-    print("                      (or to current folder if missing)")
-    print("      -d ID [destination]: download and extract specified ID entry of the INI to Folder")
-    print("                      (or to current folder if missing)")
-    print("                      e.g.: Backup2Cloud.py -d folder1")
-    print("")
-
-
 CMD_UPLOAD = "Upload"
 CMD_DOWNLOAD = "Download"
 
@@ -65,8 +53,8 @@ def Main():
                         help='Download and extract all (*) or only the specified ID entry of the INI to Destination folder. Example: -d folder1' )
     parser.add_argument( '-log',
                         '--loglevel',
-                        default='info',
-                        help='Provide logging level. Example --loglevel debug, default=info' )
+                        default='warning',
+                        help='Provide logging level. Example --loglevel debug, default=warning' )
     args = parser.parse_args()
 
     logging.basicConfig(

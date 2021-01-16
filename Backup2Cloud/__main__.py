@@ -208,6 +208,7 @@ def Main():
                         logging.info(f"Uploading package for: {cloudplace}|{key}={val}")
                         provider.uploadfile(filepath=zipfile)
                         
+                        logging.debug(f"Write checksum to {checksumfilename}")
                         with open(checksumfilename, 'w') as f:
                             f.write(checksum)
                         verdict += f"{cloudplace}\tUploaded\t{key}\t{os.path.basename(zipfile)}\t{val}\t{size}\n"

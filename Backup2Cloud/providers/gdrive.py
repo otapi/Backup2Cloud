@@ -101,7 +101,7 @@ class GDrive(ProvidersInterface):
             status, response = request.next_chunk()
             if status:
                 print("Uploaded %d%%." % int(status.progress() * 100))
-            logging.info(f"Upload Complete!")
+        logging.info(f"Upload Complete!")
 
     def downloadfile(self, filename, localfolder):
         """Download the specified file from GDrive to the specified local folder. Returns the local filepath."""

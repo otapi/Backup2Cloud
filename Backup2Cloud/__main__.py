@@ -111,6 +111,15 @@ def Main():
         if not os.path.isdir(tempdirname):
             os.makedirs(tempdirname)
 
+    logging.info(f"Checking for cloudplace credentials")
+    for cloudplace in config.sections():
+        for (key, val) in config.items(cloudplace):
+            if key=="type":
+                if val=="GDrive":
+                    provider = providers.GDrive(cloudplace, os.path.join(homefolder, "credentials.json"))
+                    freespace = formatSize(provider.getFreespaceBytes())
+                    logging.info(f"Free space on {cloudplace}: {freespace}")
+
     for cloudplace in config.sections():
         if cloudplace=="Options":
             continue

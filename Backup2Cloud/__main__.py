@@ -180,6 +180,9 @@ def Main():
                                 verdict += f"{cloudplace}\tNo change\t{key}\t{os.path.basename(zipfile)}\t{val}\tskipped\n"
                                 continue
                         
+                        with open(checksumfilename, 'w') as f:
+                                f.write(checksum)
+
                         size = 0
                         if isfolder:
                             if not packagePassword:

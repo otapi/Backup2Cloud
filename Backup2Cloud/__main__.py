@@ -237,7 +237,7 @@ def Main():
 
         freespace = formatSize(provider.getFreespaceBytes())
         logging.info(f"Free space on {cloudplace}: {freespace}")
-        verdict += f"{cloudplace}\tAll packages on {cloudplace} take {formatSize(sumsize)} of {freespace}\t\t\t\t\n"
+        verdict += f"{cloudplace}\tAll packages on {cloudplace} take {formatSize(sumsize)} and free space is {freespace}\t\t\t\t\n"
         provider.close()
     
     logging.info(f"--------")

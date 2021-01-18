@@ -121,11 +121,11 @@ def Main():
                     logging.info(f"Free space on {cloudplace}: {freespace}")
                     provider.close()
 
+    verdict = "Verdict\nCPlace\tState\tID\tConfiscated name\tLocal place\tPackage size\n"
     for cloudplace in config.sections():
         if cloudplace=="Options":
             continue
         
-        verdict = "Verdict\nCPlace\tState\tID\tConfiscated name\tLocal place\tPackage size\n"
         logging.info(f"Processing {cloudplace}")
         packagePassword = None
         provider = providers.ProvidersInterface(None)

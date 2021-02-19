@@ -4,6 +4,14 @@ Backup specific folders and upload to a cloud provider. The uploaded files are 7
 Currently only Google Drive is supported, but can handle multiple accounts.
 
 Important: The tool can run only on machine with UI (with JavaScript enabled browser). Google doesn't allow to reach personal Google Drive files without UI: 'User data cannot be accessed from a platform without a UI because it requires user interaction for sign-in.'
+
+## What's new?
+### 1.0.17
+- New: wait some time after deleting a file from GDrive to wait for proper freespace info
+### 1.0.16
+- Fixed: Upload were not skipped when cheskum matched
+- New: creates log file Backup2Cloud.log in home directory
+
 ## Install and Setup
 Requirements: Python 3.7 with pip and setuptools. If not installed, do it on Debian:
 
@@ -11,7 +19,7 @@ Requirements: Python 3.7 with pip and setuptools. If not installed, do it on Deb
 
 Install the tool's package via pip:
 
-`python -m pip install Backup2Cloud`
+`python -m pip install --upgrade Backup2Cloud`
 
 Run first time:
 

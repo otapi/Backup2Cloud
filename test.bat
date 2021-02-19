@@ -8,7 +8,7 @@ rem pip install -r requirements.txt
 
 rem update the version number accordingly
 
-rem pip install Backup2Cloud-0.0.1.tar.gz
+rem pip install --upgrade Backup2Cloud
 python -m Backup2Cloud
 python -m Backup2Cloud -log debug
 

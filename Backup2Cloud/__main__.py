@@ -1,5 +1,6 @@
 import configparser
 import os
+from os.path import join
 import tempfile
 from . import providers
 import logging
@@ -57,11 +58,15 @@ def Main():
                         help='Provide logging level. Example --loglevel debug, default=info' )
     args = parser.parse_args()
 
+    homefolder = os.path.join(str(Path.home()), ".Backup2Cloud")
+    if not os.path.isdir(homefolder):
+        os.makedirs(homefolder)
+
     logging.basicConfig(
         level=args.loglevel.upper(),
         format=f"[%(levelname)s]\t%(message)s",
         handlers=[
-            #logging.FileHandler(f"{logfile}.txt"),
+            logging.FileHandler(os.path.join(homefolder, "Backup2Cloud.log")),
             logging.StreamHandler(sys.stdout)
             #TalkerHandler()
         ]
@@ -85,9 +90,7 @@ def Main():
     logging.info(f"Mode: {command}")
     verdict = ""
     logging.info(f"Load INI...")
-    homefolder = os.path.join(str(Path.home()), ".Backup2Cloud")
-    if not os.path.isdir(homefolder):
-        os.makedirs(homefolder)
+    
         
     configfile = os.path.join(homefolder, "Backup2Cloud.ini")
     ignorefile = os.path.join(homefolder, ".exclude")
@@ -164,11 +167,14 @@ def Main():
                             checksum = d.hash()
                         else: 
                             checksum = getChecksumBigfile(val)
+                            zipfile = val
+
                         logging.debug(f"checksum: {checksum}")
 
                         checksumfilename = os.path.join(homefolder, f"{cloudplace}_{os.path.basename(zipfile)}").replace(".7z", ".checksum")
 
-                        logging.debug(f"checksumfilename: {checksumfilename}")
+                        logging.debug(f"checksumfilename: {checksumfilename} + {os.path.isfile(checksumfilename)}")
+                        logging.debug(f"zipfile: {os.path.basename(zipfile)} + {provider.fileexists(os.path.basename(zipfile))}")
                         if provider.fileexists(os.path.basename(zipfile)) and os.path.isfile(checksumfilename):
                             with open(checksumfilename, 'r') as f:
                                 oldchecksum=f.read()
@@ -198,8 +204,6 @@ def Main():
                                         logging.debug(f"  adding {filename}")
                                         archive.write(os.path.join(foldername, filename), arcname=os.path.join(os.path.relpath(foldername, os.path.dirname(val)), filename))
                             logging.info(f"Compress done!")
-                        else:
-                            zipfile = val
 
                         size = formatSize(os.path.getsize(zipfile))
                         sumsize += os.path.getsize(zipfile)

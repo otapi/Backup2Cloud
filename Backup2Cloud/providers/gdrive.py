@@ -1,5 +1,6 @@
 import os
 import pickle
+import time
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
@@ -92,6 +93,18 @@ class GDrive(ProvidersInterface):
             logging.info(f"Already exists on GDrive, deleting: {filename}")
             logging.debug(f"exists: {exists}")
             self.service.files().delete(fileId=exists).execute()
+            fsize = os.path.getsize(filepath)
+            freebytes = self.getFreespaceBytes()
+            tries = 0
+            while fsize > freebytes and tries < 4:
+                logging.debug("Free size were not updated yet, waiting for 30 sec...")
+                time.sleep(30)
+                tries = tries + 1
+                freebytes = self.getFreespaceBytes()
+
+            if fsize > freebytes:
+                logging.error(f"There is not enough space on GDRive!")
+                raise Exception()
 
         logging.info(f"Upload started for {filepath}...")
         media = MediaFileUpload(filepath, mimetype='application/x-7z-compressed', resumable=True)

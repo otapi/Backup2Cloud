@@ -10,6 +10,7 @@ rem update the version number accordingly
 
 rem pip install Backup2Cloud-0.0.1.tar.gz
 python -m Backup2Cloud
+python -m Backup2Cloud -log debug
 
 rem crontab -e
 rem 00 00 16 * * /usr/bin/python3 -m Backup2Cloud > /mnt/HDD/Backup2Cloud/run.log
